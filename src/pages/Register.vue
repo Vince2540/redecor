@@ -1,66 +1,55 @@
 <template>
-  <div class="auth-container">
-    <h2>Register</h2>
-    <form @submit.prevent="handleRegister">
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit">Register</button>
-    </form>
-
-    <p>
-      Already have an account?
-      <router-link to="/login">Login here</router-link>
-    </p>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center mb-6">Create Account</h2>
+      <form @submit.prevent="handleRegister" class="space-y-4">
+        <input
+          v-model="email"
+          type="email"
+          placeholder="Email"
+          class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-indigo-300"
+          required
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-indigo-300"
+          required
+        />
+        <button
+          type="submit"
+          class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+        >
+          Register
+        </button>
+      </form>
+      <div class="mt-4 text-sm text-center">
+        Already have an account?
+        <router-link to="/login" class="text-indigo-600 hover:underline">
+          Login
+        </router-link>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { auth } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "../store/auth";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const authStore = useAuthStore();
 
 const handleRegister = async () => {
   try {
-    await createUserWithEmailAndPassword(auth, email.value, password.value);
+    await authStore.register(email.value, password.value);
     router.push("/");
   } catch (error) {
     alert(error.message);
   }
 };
 </script>
-
-<style>
-/* reuse same styles as login */
-.auth-container {
-  max-width: 400px;
-  margin: 4rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  text-align: center;
-}
-.auth-container input {
-  display: block;
-  width: 100%;
-  margin: 0.8rem 0;
-  padding: 0.7rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-.auth-container button {
-  width: 100%;
-  padding: 0.7rem;
-  margin-top: 1rem;
-  border: none;
-  background: #222;
-  color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-}
-</style>

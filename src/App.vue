@@ -9,6 +9,8 @@
       <nav :class="{ open: navOpen }">
         <a href="#">Home</a>
         <a href="#">Cart</a>
+        <a href="#">Products</a>
+        <a href="#">Settings</a>
         <a href="#">About</a>
       </nav>
       <button class="menu-toggle" @click="toggleNav">

@@ -1,31 +1,64 @@
 <template>
-  <transition name="fade">
-    <div
-      v-if="show"
-      class="fixed inset-0 flex items-center justify-center bg-blue-600 text-white text-4xl font-bold z-50"
-    >
-      ReDecor ✨
-    </div>
-  </transition>
+  <div class="splash-container">
+    <h1 class="logo">ReDecor</h1>
+    <p class="tagline">Redefine your space ✨</p>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../store/auth";
 
-const show = ref(true);
+const router = useRouter();
+const authStore = useAuthStore();
 
 onMounted(() => {
+  // ✅ Check if splash was already shown
+  const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+
+  if (hasSeenSplash) {
+    // Skip splash screen and go straight to login/home
+    if (authStore.user) {
+      router.replace({ name: "home" });
+    } else {
+      router.replace({ name: "login" });
+    }
+    return;
+  }
+
+  // ⏳ Show splash for 2s only once
   setTimeout(() => {
-    show.value = false;
-  }, 2000); // hide splash after 2 seconds
+    localStorage.setItem("hasSeenSplash", "true"); // Mark as seen
+    if (authStore.user) {
+      router.replace({ name: "home" });
+    } else {
+      router.replace({ name: "login" });
+    }
+  }, 2000);
 });
 </script>
 
-<style>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s ease;
+<style scoped>
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #222, #444);
+  color: white;
+  text-align: center;
 }
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+
+.logo {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.tagline {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  opacity: 0.85;
 }
 </style>

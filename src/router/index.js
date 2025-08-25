@@ -1,30 +1,48 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../pages/Home.vue'
-import Products from '../pages/Products.vue'
-import ProductDetails from '../pages/ProductDetails.vue'
-import Cart from '../pages/Cart.vue'
-import Checkout from '../pages/Checkout.vue'
-import Login from "../views/Login.vue";
-import App from "../App.vue";
+import { createRouter, createWebHistory } from "vue-router";
+import SplashScreen from "../components/SplashScreen.vue";
+import Home from "../pages/Home.vue";
+import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import ForgotPassword from "../pages/ForgotPassword.vue";
+import Products from "../pages/Products.vue";
+import ProductDetails from "../pages/ProductDetails.vue";
+import Cart from "../pages/Cart.vue";
+import Checkout from "../pages/Checkout.vue";
+
+import { useAuthStore } from "../store/auth";
 
 const routes = [
-  { path: '/', name: 'home', component: Home },
-  { path: '/products', name: 'products', component: Products },
-  { path: '/product/:id', name: 'product-details', component: ProductDetails, props: true },
-  { path: '/cart', name: 'cart', component: Cart },
-  { path: '/checkout', name: 'checkout', component: Checkout },
-  { path: "/", component: App },
-  { path: "/login", component: Login },
-  { path: "/register", component: Register },
-   { path: "/forgot-password", name: "ForgotPassword", component: ForgotPassword },
-]
+  { path: "/", name: "splash", component: SplashScreen },
+  { path: "/login", name: "login", component: Login },
+  { path: "/register", name: "register", component: Register },
+  { path: "/forgot-password", name: "forgotPassword", component: ForgotPassword },
+
+  // Protected routes
+  { path: "/home", name: "home", component: Home, meta: { requiresAuth: true } },
+  { path: "/products", name: "products", component: Products, meta: { requiresAuth: true } },
+  { path: "/products/:id", name: "productDetails", component: ProductDetails, meta: { requiresAuth: true } },
+  { path: "/cart", name: "cart", component: Cart, meta: { requiresAuth: true } },
+  { path: "/checkout", name: "checkout", component: Checkout, meta: { requiresAuth: true } },
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() { return { top: 0 } }
-})
+});
 
-export default router
+// 🔒 Navigation Guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+
+  // Use `authStore.user?.uid` instead of `authStore.user`
+  if (to.meta.requiresAuth && !authStore.user?.uid) {
+    next({ name: "login" });
+  } else if ((to.name === "login" || to.name === "register") && authStore.user?.uid) {
+    // Prevent logged-in users from going back to login/register
+    next({ name: "home" });
+  } else {
+    next();
+  }
+});
+
+export default router;
